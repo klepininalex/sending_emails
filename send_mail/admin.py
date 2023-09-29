@@ -17,7 +17,7 @@ class MailSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(TextMail)
 class TextMailAdmin(admin.ModelAdmin):
-    list_display = ('body', 'topic')
+    list_display = ('topic', 'body')
     list_filter = ('topic',)
     search_fields = ('topic',)
 
@@ -29,4 +29,6 @@ class LogMailAdmin(admin.ModelAdmin):
 
 @admin.register(MailingClient)
 class MailingClientAdmin(admin.ModelAdmin):
-    list_display = ('client', 'settings')
+    list_display = ('settings',)
+    filter_horizontal = ('clients',)
+

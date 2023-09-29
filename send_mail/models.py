@@ -1,3 +1,4 @@
+import django
 from django.db import models
 
 NULLABLE = {'blank': True,
@@ -9,6 +10,8 @@ class Client(models.Model):
     full_name = models.CharField(max_length=150, verbose_name='ФИО')
     comment = models.TextField(verbose_name='комментарий', **NULLABLE)
 
+    mail = models.ForeignKey('MailingClient', on_delete=models.CASCADE, verbose_name='рассылка', **NULLABLE)
+
     def __str__(self):
         return self.full_name
 
@@ -19,7 +22,6 @@ class Client(models.Model):
 
 
 class MailSettings(models.Model):
-
     PERIOD_CHOICES = (
         ('D', 'Каждый день'),
         ('W', 'Каждую неделю'),
@@ -39,14 +41,20 @@ class MailSettings(models.Model):
 
     message = models.ForeignKey('TextMail', on_delete=models.CASCADE, verbose_name='сообщение', **NULLABLE)
 
+    def __str__(self):
+        return f'{self.pk}'
+
     class Meta:
-        verbose_name = 'Рассылка'
-        verbose_name_plural = 'Рассылки'
+        verbose_name = 'Настройка'
+        verbose_name_plural = 'Настройки'
 
 
 class TextMail(models.Model):
     topic = models.CharField(max_length=200, verbose_name='тема')
     body = models.TextField(verbose_name='сообщение')
+
+    def __str__(self):
+        return self.topic
 
     class Meta:
         verbose_name = 'Сообщение для рассылки'
@@ -66,12 +74,15 @@ class LogMail(models.Model):
 
 
 class MailingClient(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='клиент')
-    settings = models.ForeignKey(MailSettings, on_delete=models.CASCADE, verbose_name='настройка')
+    clients = models.ManyToManyField(Client, verbose_name='клиенты')
+    settings = models.ForeignKey(MailSettings, on_delete=models.CASCADE, verbose_name='настройка', **NULLABLE)
+
+    created_by = models.ForeignKey(django.conf.settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   verbose_name='создано пользователем', **NULLABLE)
 
     def __str__(self):
-        return f'{self.client} {self.settings}'
+        return f'{self.clients} {self.settings}'
 
     class Meta:
-        verbose_name = 'Письмо'
-        verbose_name_plural = 'Письма'
+        verbose_name = 'Рассылка'
+        verbose_name_plural = 'Рассылки'
